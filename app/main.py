@@ -1,6 +1,7 @@
 import math
 from typing import Tuple, Union
 
+
 class Vector:
     def __init__(self, end_x: float, end_y: float) -> None:
         self.end_x = round(end_x, 2)
@@ -14,14 +15,21 @@ class Vector:
 
     def __mul__(self, other: Union["Vector", float]) -> Union["Vector", float]:
         if isinstance(other, (int, float)):
-            return Vector(round(self.end_x * other, 2), round(self.end_y * other, 2))
-        elif isinstance(other, Vector):
-            return round(self.end_x * other.end_x + self.end_y * other.end_y, 5)
-        else:
-            raise ValueError("Multiplication with non-numeric or non-Vector type is not supported")
+            return Vector(
+                round(self.end_x * other, 2),
+                round(self.end_y * other, 2)
+            )
+        if isinstance(other, Vector):
+            return round(
+                self.end_x * other.end_x + self.end_y * other.end_y,
+                5
+            )
+        raise ValueError("Multiplication with non-numeric or non-Vector type")
 
     @classmethod
-    def create_vector_by_two_points(cls, start_point: Tuple[float, float], end_point: Tuple[float, float]) -> "Vector":
+    def create_vector_by_two_points(
+        cls, start_point: Tuple[float, float], end_point: Tuple[float, float]
+    ) -> "Vector":
         end_x = end_point[0] - start_point[0]
         end_y = end_point[1] - start_point[1]
         return cls(end_x, end_y)
@@ -33,7 +41,10 @@ class Vector:
         length = self.get_length()
         if length == 0:
             return Vector(0, 0)
-        return Vector(round(self.end_x / length, 2), round(self.end_y / length, 2))
+        return Vector(
+            round(self.end_x / length, 2),
+            round(self.end_y / length, 2)
+        )
 
     def angle_between(self, other: "Vector") -> int:
         dot_product = self * other
