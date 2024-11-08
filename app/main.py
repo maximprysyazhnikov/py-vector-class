@@ -1,68 +1,70 @@
 import math
+from typing import Union, Tuple
 
 
 class Vector:
-    def __init__(self, end_x: float, end_y: float) -> None:
-        """Ініціалізація вектора з координатами кінцевої точки."""
-        self.end_x = end_x
-        self.end_y = end_y
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
 
     def __add__(self, other: "Vector") -> "Vector":
-        """Метод для додавання двох векторів."""
-        if not isinstance(other, Vector):
-            raise ValueError("Operand must be a Vector.")
-        return Vector(self.end_x + other.end_x, self.end_y + other.end_y)
+        if isinstance(other, Vector):
+            return Vector(self.x + other.x, self.y + other.y)
+        raise ValueError("Operand must be a Vector.")
 
     def __sub__(self, other: "Vector") -> "Vector":
-        """Метод для віднімання двох векторів."""
-        if not isinstance(other, Vector):
-            raise ValueError("Operand must be a Vector.")
-        return Vector(self.end_x - other.end_x, self.end_y - other.end_y)
+        if isinstance(other, Vector):
+            return Vector(self.x - other.x, self.y - other.y)
+        raise ValueError("Operand must be a Vector.")
 
-    def __mul__(self, other: "Vector") -> float:
-        """Метод для обчислення скалярного добутку двох векторів."""
-        if not isinstance(other, Vector):
-            raise ValueError("Operand must be a Vector.")
-        return self.end_x * other.end_x + self.end_y * other.end_y
-
-    def scalar_multiply(self, number: float) -> "Vector":
-        """Метод для множення вектора на скаляр."""
-        if not isinstance(number, (int, float)):
-            raise ValueError("Operand must be a number.")
-        return Vector(self.end_x * number, self.end_y * number)
-
-    def get_angle(self) -> float:
-        """Метод для обчислення кута вектора від осі X в радіанах."""
-        angle = math.atan2(self.end_y, self.end_x)
-        return math.degrees(angle)  # Перетворення з радіан в градуси
-
-    def get_normalized(self) -> "Vector":
-        """Метод для нормалізації вектора."""
-        magnitude = self.magnitude()
-        if magnitude == 0:
-            raise ValueError("Cannot normalize a zero vector.")
-        return self.scalar_multiply(1 / magnitude)
-
-    def magnitude(self) -> float:
-        """Метод для обчислення довжини (модулю) вектора."""
-        return math.sqrt(self.end_x ** 2 + self.end_y ** 2)
-
-    def rotate(self, angle_degrees: float) -> "Vector":
-        """Метод для обертання вектора на заданий кут в градусах."""
-        angle_radians = math.radians(angle_degrees)  # Перетворення в градуси
-        cos_angle = math.cos(angle_radians)
-        sin_angle = math.sin(angle_radians)
-        new_x = self.end_x * cos_angle - self.end_y * sin_angle
-        new_y = self.end_x * sin_angle + self.end_y * cos_angle
-        return Vector(new_x, new_y)
-
-    @classmethod
-    def create_from_two_points(cls, start_point: tuple, end_point: tuple) -> "Vector":
-        """Метод для створення вектора з двох точок."""
-        start_x, start_y = start_point
-        end_x, end_y = end_point
-        return cls(end_x - start_x, end_y - start_y)
+    def __mul__(self, other: Union["Vector", float, int]) -> Union["Vector", float]:
+        if isinstance(other, Vector):
+            return self.dot(other)
+        elif isinstance(other, (int, float)):
+            return Vector(round(self.x * other, 2), round(self.y * other, 2))
+        raise ValueError("Operand must be a Vector or a scalar.")
 
     def __repr__(self) -> str:
-        """Метод для репрезентації об'єкта."""
-        return f"Vector({self.end_x}, {self.end_y})"
+        return f"Vector({self.x}, {self.y})"
+
+    def get_length(self) -> float:
+        return round(math.sqrt(self.x ** 2 + self.y ** 2), 2)
+
+    def get_angle(self) -> float:
+        return round(math.degrees(math.atan2(self.y, self.x)), 2)
+
+    def angle_between(self, other: "Vector") -> float:
+        if not isinstance(other, Vector):
+            raise ValueError("Operand must be a Vector.")
+
+        dot_product = self.dot(other)
+        magnitude1 = self.get_length()
+        magnitude2 = other.get_length()
+
+        cosine_theta = dot_product / (magnitude1 * magnitude2)
+        cosine_theta = max(-1, min(1, cosine_theta))
+        return round(math.degrees(math.acos(cosine_theta)), 2)
+
+    def dot(self, other: "Vector") -> float:
+        if isinstance(other, Vector):
+            return self.x * other.x + self.y * other.y
+        raise ValueError("Operand must be a Vector.")
+
+    @classmethod
+    def from_points(cls, start_point: Tuple[float, float], end_point: Tuple[float, float]) -> "Vector":
+        return cls(end_point[0] - start_point[0], end_point[1] - start_point[1])
+
+    def normalize(self) -> "Vector":
+        length = self.get_length()
+        if length == 0:
+            raise ValueError("Cannot normalize a zero vector.")
+        return Vector(round(self.x / length, 2), round(self.y / length, 2))
+
+    def rotate(self, angle: float) -> "Vector":
+        angle_rad = math.radians(angle)
+        new_x = self.x * math.cos(angle_rad) - self.y * math.sin(angle_rad)
+        new_y = self.x * math.sin(angle_rad) + self.y * math.cos(angle_rad)
+        return Vector(round(new_x, 2), round(new_y, 2))
+
+    def get_normalized(self) -> "Vector":
+        return self.normalize()
