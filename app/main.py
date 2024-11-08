@@ -3,9 +3,9 @@ from typing import Union, Tuple
 
 
 class Vector:
-    def __init__(self, x: float, y: float):
-        self.x = x
-        self.y = y
+    def __init__(self, x_coord: float, y_coord: float):
+        self.x = x_coord
+        self.y = y_coord
 
     def __add__(self, other: "Vector") -> "Vector":
         if isinstance(other, Vector):
