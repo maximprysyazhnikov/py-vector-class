@@ -3,7 +3,7 @@ from typing import Union, Tuple
 
 
 class Vector:
-    def __init__(self, x_coord: float, y_coord: float):
+    def __init__(self, x_coord: float, y_coord: float) -> None:
         self.x = x_coord
         self.y = y_coord
 
