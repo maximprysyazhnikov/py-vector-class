@@ -21,7 +21,9 @@ class Vector:
         if isinstance(other, Vector):
             return self.dot(other)
         elif isinstance(other, (int, float)):
-            return Vector(round(self.x * other, 2), round(self.y * other, 2))
+            return Vector(
+                round(self.x * other, 2), round(self.y * other, 2)
+            )  # shortened
         raise ValueError("Operand must be a Vector or a scalar.")
 
     def __repr__(self) -> str:
@@ -51,7 +53,9 @@ class Vector:
         raise ValueError("Operand must be a Vector.")
 
     @classmethod
-    def from_points(cls, start_point: Tuple[float, float], end_point: Tuple[float, float]) -> "Vector":
+    def from_points(
+        cls, start_point: Tuple[float, float], end_point: Tuple[float, float]
+    ) -> "Vector":
         return cls(end_point[0] - start_point[0], end_point[1] - start_point[1])
 
     def normalize(self) -> "Vector":
