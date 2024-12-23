@@ -1,74 +1,58 @@
 import math
-from typing import Union, Tuple
-
 
 class Vector:
-    def __init__(self, x_coord: float, y_coord: float) -> None:
-        self.x = x_coord
-        self.y = y_coord
+    def __init__(self, x, y):
+        self.x = round(x, 2)
+        self.y = round(y, 2)
 
-    def __add__(self, other: "Vector") -> "Vector":
+    def __add__(self, other):
         if isinstance(other, Vector):
             return Vector(self.x + other.x, self.y + other.y)
-        raise ValueError("Operand must be a Vector.")
+        return NotImplemented
 
-    def __sub__(self, other: "Vector") -> "Vector":
+    def __sub__(self, other):
         if isinstance(other, Vector):
             return Vector(self.x - other.x, self.y - other.y)
-        raise ValueError("Operand must be a Vector.")
+        return NotImplemented
 
-    def __mul__(self, other: Union["Vector", float, int]) -> Union["Vector", float]:
+    def __mul__(self, other):
         if isinstance(other, Vector):
-            return self.dot(other)
+            return self.x * other.x + self.y * other.y  # Dot product
         elif isinstance(other, (int, float)):
-            return Vector(
-                round(self.x * other, 2), round(self.y * other, 2)
-            )  # shortened
-        raise ValueError("Operand must be a Vector or a scalar.")
-
-    def __repr__(self) -> str:
-        return f"Vector({self.x}, {self.y})"
-
-    def get_length(self) -> float:
-        return round(math.sqrt(self.x ** 2 + self.y ** 2), 2)
-
-    def get_angle(self) -> float:
-        return round(math.degrees(math.atan2(self.y, self.x)), 2)
-
-    def angle_between(self, other: "Vector") -> float:
-        if not isinstance(other, Vector):
-            raise ValueError("Operand must be a Vector.")
-
-        dot_product = self.dot(other)
-        magnitude1 = self.get_length()
-        magnitude2 = other.get_length()
-
-        cosine_theta = dot_product / (magnitude1 * magnitude2)
-        cosine_theta = max(-1, min(1, cosine_theta))
-        return round(math.degrees(math.acos(cosine_theta)), 2)
-
-    def dot(self, other: "Vector") -> float:
-        if isinstance(other, Vector):
-            return self.x * other.x + self.y * other.y
-        raise ValueError("Operand must be a Vector.")
+            return Vector(self.x * other, self.y * other)
+        return NotImplemented
 
     @classmethod
-    def from_points(
-        cls, start_point: Tuple[float, float], end_point: Tuple[float, float]
-    ) -> "Vector":
-        return cls(end_point[0] - start_point[0], end_point[1] - start_point[1])
+    def create_vector_by_two_points(cls, start_point, end_point):
+        x = round(end_point[0] - start_point[0], 2)
+        y = round(end_point[1] - start_point[1], 2)
+        return cls(x, y)
 
-    def normalize(self) -> "Vector":
+    def get_length(self):
+        return math.sqrt(self.x**2 + self.y**2)
+
+    def get_normalized(self):
         length = self.get_length()
         if length == 0:
-            raise ValueError("Cannot normalize a zero vector.")
-        return Vector(round(self.x / length, 2), round(self.y / length, 2))
+            return Vector(0, 0)
+        return Vector(self.x / length, self.y / length)
 
-    def rotate(self, angle: float) -> "Vector":
-        angle_rad = math.radians(angle)
-        new_x = self.x * math.cos(angle_rad) - self.y * math.sin(angle_rad)
-        new_y = self.x * math.sin(angle_rad) + self.y * math.cos(angle_rad)
-        return Vector(round(new_x, 2), round(new_y, 2))
+    def angle_between(self, other):
+        if isinstance(other, Vector):
+            dot_product = self * other
+            length_product = self.get_length() * other.get_length()
+            cos_angle = dot_product / length_product
+            cos_angle = max(min(cos_angle, 1), -1)  # Clamp cos_angle to avoid rounding errors
+            angle_rad = math.acos(cos_angle)
+            return round(math.degrees(angle_rad))
+        return NotImplemented
 
-    def get_normalized(self) -> "Vector":
-        return self.normalize()
+    def get_angle(self):
+        # Corrected angle calculation
+        return round(math.degrees(math.atan2(-self.x, self.y)))
+
+    def rotate(self, degrees):
+        radians = math.radians(degrees)
+        new_x = round(self.x * math.cos(radians) - self.y * math.sin(radians), 2)
+        new_y = round(self.x * math.sin(radians) + self.y * math.cos(radians), 2)
+        return Vector(new_x, new_y)
